@@ -1,3 +1,8 @@
+using DevHabit.Api.Database;
+using DevHabit.Api.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -11,6 +16,16 @@ builder.Services.AddControllers();
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options
+        .UseNpgsql(
+             builder.Configuration.GetConnectionString("Database"),
+             npgsqloptions=>npgsqloptions
+                  .MigrationsHistoryTable(HistoryRepository.DefaultTableName,Schemas.Application))
+        .UseSnakeCaseNamingConvention();
+});
+
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resourceBuilder =>
     {
@@ -20,6 +35,7 @@ builder.Services.AddOpenTelemetry()
     {
         tracerProviderBuilder.AddAspNetCoreInstrumentation();
         tracerProviderBuilder.AddHttpClientInstrumentation();
+        tracerProviderBuilder.AddNpgsql();
 
     })
     .WithMetrics(metricsBuilder =>
@@ -33,15 +49,16 @@ builder.Services.AddOpenTelemetry()
 builder.Logging.AddOpenTelemetry(loggingBuilder =>
 {
     loggingBuilder.IncludeScopes = true;
-    loggingBuilder.IncludeFormattedMessage = true;  
+    loggingBuilder.IncludeFormattedMessage = true;
 });
 
-    WebApplication app = builder.Build();
+WebApplication app = builder.Build();
 
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAsync();
 }
 
 app.UseHttpsRedirection();
