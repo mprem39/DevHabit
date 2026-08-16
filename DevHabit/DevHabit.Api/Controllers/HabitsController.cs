@@ -9,15 +9,22 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace DevHabit.Api.Controllers;
+
 [ApiController]
 [Route("habits")]
-public sealed class HabitsController(ApplicationDbContext dbContext): ControllerBase
+public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitCollectionDto>> GetHabits()
+    public async Task<ActionResult<HabitCollectionDto>> GetHabits([FromQuery] HabitsQueryParameters query)
     {
-            List<HabitDto> habits = await dbContext
-            .Habits
+        
+        query.Search = query.Search?.Trim();
+        List<HabitDto> habits = await dbContext.Habits
+            .Where(h => string.IsNullOrWhiteSpace(query.Search) ||
+                        h.Name != null && EF.Functions.Like(h.Name, $"%{query.Search}%") ||
+                        h.Description != null && EF.Functions.Like(h.Description, $"%{query.Search}%"))
+            .Where(h => query.Type == null || h.Type == query.Type)
+            .Where(h => query.Status == null || h.Status == query.Status)
             .Select(HabitQueries.ProjectToDto())
             .ToListAsync();
         var habitsCollectionDto = new HabitCollectionDto { Data = habits };
@@ -56,16 +63,16 @@ public sealed class HabitsController(ApplicationDbContext dbContext): Controller
 
         dbContext.Habits.Add(habit);
         await dbContext.SaveChangesAsync();
-        HabitDto habitDto= habit.ToDto();
+        HabitDto habitDto = habit.ToDto();
         return CreatedAtAction(nameof(GetHabit), new { id = habitDto.Id }, habitDto);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateHabit(string id, UpdateHabitDto updateHabitDto)
     {
-        Habit? habit = await dbContext.Habits.FirstOrDefaultAsync(h=> h.Id==id);
-        if(habit is null) 
-        { 
+        Habit? habit = await dbContext.Habits.FirstOrDefaultAsync(h => h.Id == id);
+        if (habit is null)
+        {
             return NotFound();
         }
         habit.UpdateFromDto(updateHabitDto);
@@ -84,16 +91,16 @@ public sealed class HabitsController(ApplicationDbContext dbContext): Controller
         }
 
         HabitDto habitDto = habit.ToDto();
-        patchDoc.ApplyTo(habitDto,ModelState);
+        patchDoc.ApplyTo(habitDto, ModelState);
 
-        if(!TryValidateModel(habitDto))
+        if (!TryValidateModel(habitDto))
         {
             return ValidationProblem(ModelState);
         }
 
-        habit.Name=habitDto.Name;
-        habit.Description= habitDto.Description;
-        habit.UpdatedAtUTC=DateTime.UtcNow;
+        habit.Name = habitDto.Name;
+        habit.Description = habitDto.Description;
+        habit.UpdatedAtUTC = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
         return NoContent();
     }
