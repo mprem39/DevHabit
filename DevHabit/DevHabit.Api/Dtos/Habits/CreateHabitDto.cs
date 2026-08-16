@@ -13,3 +13,4 @@ public sealed record CreateHabitDto
     public DateOnly? EndDate { get; init; }
     public MilestoneDto? Milestone { get; init; }
 }
+
