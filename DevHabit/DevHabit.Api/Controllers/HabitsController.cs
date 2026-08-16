@@ -42,14 +42,15 @@ public sealed class HabitsController(ApplicationDbContext dbContext): Controller
     }
 
     [HttpPost]
-    public async Task<ActionResult<HabitDto>> CreateHabit(CreateHabitDto createHabitDto, IValidator<CreateHabitDto> validator, ProblemDetailsFactory problemDetailsFactory)
+    public async Task<ActionResult<HabitDto>> CreateHabit(CreateHabitDto createHabitDto, IValidator<CreateHabitDto> validator)
     {
-        if (!(await validator.ValidateAsync(createHabitDto)).IsValid)
-        {
-            ProblemDetails problemDetails = problemDetailsFactory.CreateProblemDetails(HttpContext, StatusCodes.Status400BadRequest);
-            problemDetails.Extensions.Add("errors", (await validator.ValidateAsync(createHabitDto)).ToDictionary());
-            return BadRequest(problemDetails);
-        }
+        await validator.ValidateAndThrowAsync(createHabitDto);
+        //if (!(await validator.ValidateAsync(createHabitDto)).IsValid)
+        //{
+        //    ProblemDetails problemDetails = problemDetailsFactory.CreateProblemDetails(HttpContext, StatusCodes.Status400BadRequest);
+        //    problemDetails.Extensions.Add("errors", (await validator.ValidateAsync(createHabitDto)).ToDictionary());
+        //    return BadRequest(problemDetails);
+        //}
 
         Habit habit = createHabitDto.ToEntity();
 
