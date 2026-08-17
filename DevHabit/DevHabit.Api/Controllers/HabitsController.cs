@@ -1,6 +1,7 @@
 ﻿using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using DevHabit.Api.Database;
+using DevHabit.Api.DTOs.Common;
 using DevHabit.Api.DTOs.Habits;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services.Sorting;
@@ -17,7 +18,7 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitCollectionDto>> GetHabits([FromQuery] HabitsQueryParameters query,SortMappingProvider sortMappingProvider)
+    public async Task<ActionResult<PaginationResult<HabitDto>>> GetHabits([FromQuery] HabitsQueryParameters query,SortMappingProvider sortMappingProvider)
     {
         if(!sortMappingProvider.ValidateMappings<HabitDto, Habit>(query.Sort))
         {
@@ -28,17 +29,19 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         }
         query.Search = query.Search?.Trim();
         SortMapping[] sortMappings = sortMappingProvider.GetMappings<HabitDto, Habit>();
-        List<HabitDto> habits = await dbContext.Habits
+        IQueryable<HabitDto> habitsQuery = dbContext.Habits
             .Where(h => string.IsNullOrWhiteSpace(query.Search) ||
                         h.Name != null && EF.Functions.Like(h.Name, $"%{query.Search}%") ||
                         h.Description != null && EF.Functions.Like(h.Description, $"%{query.Search}%"))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
             .ApplySort(query.Sort, sortMappings)
-            .Select(HabitQueries.ProjectToDto())
-            .ToListAsync();
-        var habitsCollectionDto = new HabitCollectionDto { Data = habits };
-        return Ok(habitsCollectionDto);
+            .Select(HabitQueries.ProjectToDto());
+
+
+        PaginationResult<HabitDto> paginationResult = await PaginationResult<HabitDto>.CreateAsync(habitsQuery, query.Page, query.PageSize);
+
+        return Ok(paginationResult);
     }
 
     [HttpGet("{id}")]
