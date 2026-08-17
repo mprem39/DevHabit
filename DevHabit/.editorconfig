@@ -69,6 +69,9 @@ csharp_style_expression_bodied_accessors = true:error
 csharp_style_expression_bodied_lambdas = true:none
 csharp_style_expression_bodied_local_functions = true:error
 
+# S2326: Unused type parameters should be removed
+dotnet_diagnostic.S2326.severity = silent
+
 [*.{cs,vb}]
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion

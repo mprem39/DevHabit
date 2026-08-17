@@ -1,0 +1,7 @@
+root = true
+
+# Suppress Sonar rule S2326 (TSource declared but not used)
+dotnet_diagnostic.S2326.severity = none
+
+# You can also disable CA1862 if needed:
+# dotnet_diagnostic.CA1862.severity = none
