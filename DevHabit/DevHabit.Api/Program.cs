@@ -1,3 +1,4 @@
+using DevHabit.Api;
 using DevHabit.Api.Database;
 using DevHabit.Api.DTOs.Habits;
 using DevHabit.Api.Entities;
@@ -17,76 +18,13 @@ using OpenTelemetry.Trace;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-
-
-builder.Services.AddControllers(options =>
-{
-    options.ReturnHttpNotAcceptable = true;
-})
-.AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver =
-    new CamelCasePropertyNamesContractResolver())
-.AddXmlSerializerFormatters();
-
-builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
-builder.Services.AddProblemDetails(options =>
-{
-    options.CustomizeProblemDetails = (context) =>
-    {
-        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
-    };
-});
-
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
-
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-builder.Services.AddOpenApi();
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options
-        .UseNpgsql(
-             builder.Configuration.GetConnectionString("Database"),
-             npgsqloptions=>npgsqloptions
-                  .MigrationsHistoryTable(HistoryRepository.DefaultTableName,Schemas.Application))
-        .UseSnakeCaseNamingConvention();
-});
-
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resourceBuilder =>
-    {
-        resourceBuilder.AddService(builder.Environment.ApplicationName);
-    })
-    .WithTracing(tracerProviderBuilder =>
-    {
-        tracerProviderBuilder.AddAspNetCoreInstrumentation();
-        tracerProviderBuilder.AddHttpClientInstrumentation();
-        tracerProviderBuilder.AddNpgsql();
-
-    })
-    .WithMetrics(metricsBuilder =>
-    {
-        metricsBuilder.AddAspNetCoreInstrumentation();
-        metricsBuilder.AddHttpClientInstrumentation();
-        metricsBuilder.AddRuntimeInstrumentation();
-    })
-    .UseOtlpExporter();
-
-builder.Logging.AddOpenTelemetry(loggingBuilder =>
-{
-    loggingBuilder.IncludeScopes = true;
-    loggingBuilder.IncludeFormattedMessage = true;
-});
-
-builder.Services.AddTransient<SortMappingProvider>();
-
-builder.Services.AddSingleton<ISortMappingDefinition, SortMappingDefinition<HabitDto, Habit>>(_ =>
-    HabitMappings.SortMapping);
-builder.Services.AddTransient<DataShapingService>();
+builder.AddControllers()
+     .AddErrorHandling()
+     .AddDatabase()
+     .AddObservability()
+     .AddApplicationServices();
 
 WebApplication app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
