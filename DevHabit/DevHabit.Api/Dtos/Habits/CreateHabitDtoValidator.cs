@@ -6,10 +6,10 @@ namespace DevHabit.Api.DTOs.Habits;
 public sealed class CreateHabitDtoValidator : AbstractValidator<CreateHabitDto>
 {
     private static readonly string[] AllowedUnits =
- [
-     "minutes", "hours", "steps", "km", "cal",
+    [
+        "minutes", "hours", "steps", "km", "cal",
         "pages", "books", "tasks", "sessions"
- ];
+    ];
     private static readonly string[] AllowedUnitsForBinaryHabits = ["sessions", "tasks"];
 
     public CreateHabitDtoValidator()
@@ -80,6 +80,4 @@ public sealed class CreateHabitDtoValidator : AbstractValidator<CreateHabitDto>
             _ => false // None is not valid
         };
     }
-
 }
-

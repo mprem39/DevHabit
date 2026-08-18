@@ -10,11 +10,10 @@ public sealed record UpdateHabitDto
     public required FrequencyDto Frequency { get; init; }
     public required TargetDto Target { get; init; }
     public DateOnly? EndDate { get; init; }
-    public UpdateMileStoneDto? Milestone { get; init; }
+    public UpdateMilestoneDto? Milestone { get; init; }
 }
 
-public sealed record UpdateMileStoneDto
+public sealed record UpdateMilestoneDto
 {
-   public required int Target { get; init; }
-
+    public required int Target { get; init; }
 }

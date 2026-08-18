@@ -1,7 +1,6 @@
-﻿using DevHabit.Api.DTOs.Tags;
-using DevHabit.Api.Entities;
+﻿using DevHabit.Api.Entities;
 
-namespace DevHabit.Api.DTOs.Habits;
+namespace DevHabit.Api.DTOs.Tags;
 
 internal static class TagMappings
 {

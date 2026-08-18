@@ -31,13 +31,13 @@ internal static class HabitQueries
                 Target = h.Milestone.Target,
                 Current = h.Milestone.Current
             },
-            CreatedAtUtc = h.CreatedAtUTC,
-            UpdatedAtUtc = h.UpdatedAtUTC,
-            LastCompletedAtUtc = h.LastCompletedAtUTC
+            CreatedAtUtc = h.CreatedAtUtc,
+            UpdatedAtUtc = h.UpdatedAtUtc,
+            LastCompletedAtUtc = h.LastCompletedAtUtc
         };
     }
 
-    public static Expression<Func<Habit, HabitWithTagsDto>> ProjectToWithTagsDto()
+    public static Expression<Func<Habit, HabitWithTagsDto>> ProjectToDtoWithTags()
     {
         return h => new HabitWithTagsDto
         {
@@ -63,9 +63,9 @@ internal static class HabitQueries
                 Target = h.Milestone.Target,
                 Current = h.Milestone.Current
             },
-            CreatedAtUtc = h.CreatedAtUTC,
-            UpdatedAtUtc = h.UpdatedAtUTC,
-            LastCompletedAtUtc = h.LastCompletedAtUTC,
+            CreatedAtUtc = h.CreatedAtUtc,
+            UpdatedAtUtc = h.UpdatedAtUtc,
+            LastCompletedAtUtc = h.LastCompletedAtUtc,
             Tags = h.Tags.Select(t => t.Name).ToArray()
         };
     }
@@ -96,9 +96,9 @@ internal static class HabitQueries
                 Target = h.Milestone.Target,
                 Current = h.Milestone.Current
             },
-            CreatedAt = h.CreatedAtUTC,
-            UpdatedAt = h.UpdatedAtUTC,
-            LastCompletedAt = h.LastCompletedAtUTC,
+            CreatedAt = h.CreatedAtUtc,
+            UpdatedAt = h.UpdatedAtUtc,
+            LastCompletedAt = h.LastCompletedAtUtc,
             Tags = h.Tags.Select(t => t.Name).ToArray()
         };
     }

@@ -1,5 +1,4 @@
-﻿using DevHabit.Api.DTOs.Habits;
-using DevHabit.Api.Entities;
+﻿using DevHabit.Api.Entities;
 
 namespace DevHabit.Api.DTOs.Habits;
 
@@ -13,4 +12,3 @@ public sealed record CreateHabitDto
     public DateOnly? EndDate { get; init; }
     public MilestoneDto? Milestone { get; init; }
 }
-
