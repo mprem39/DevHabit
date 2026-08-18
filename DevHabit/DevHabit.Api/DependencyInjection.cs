@@ -6,6 +6,7 @@ using DevHabit.Api.Middleware;
 using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -94,6 +95,13 @@ public static class DependencyInjection
                           .MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Application))
                 .UseSnakeCaseNamingConvention();
         });
+        builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
+           options
+               .UseNpgsql(
+                   builder.Configuration.GetConnectionString("Database"),
+                   npgsqlOptions => npgsqlOptions
+                       .MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Identity))
+               .UseSnakeCaseNamingConvention());
         return builder;
 
     }
@@ -140,6 +148,37 @@ public static class DependencyInjection
         builder.Services.AddTransient<DataShapingService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
+
+        //builder.Services.Configure<JwtAuthOptions>(builder.Configuration.GetSection("Jwt"));
+
+        //JwtAuthOptions jwtAuthOptions = builder.Configuration.GetSection("Jwt").Get<JwtAuthOptions>()!;
+
+        //builder.Services
+        //    .AddAuthentication(options =>
+        //    {
+        //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    })
+        //    .AddJwtBearer(options =>
+        //    {
+        //        options.TokenValidationParameters = new TokenValidationParameters
+        //        {
+        //            ValidIssuer = jwtAuthOptions.Issuer,
+        //            ValidAudience = jwtAuthOptions.Audience,
+        //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtAuthOptions.Key))
+        //        };
+        //    });
+
+        //builder.Services.AddAuthorization();
+
         return builder;
     }
 }

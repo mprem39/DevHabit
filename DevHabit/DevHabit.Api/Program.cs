@@ -22,7 +22,9 @@ builder.AddApiServices()
      .AddErrorHandling()
      .AddDatabase()
      .AddObservability()
-     .AddApplicationServices();
+     .AddApplicationServices()
+     .AddAuthenticationServices();
+
 
 WebApplication app = builder.Build();
 
